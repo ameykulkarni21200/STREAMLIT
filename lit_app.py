@@ -4,72 +4,39 @@ import pandas as pd
 import joblib
 import os
 import requests
+from google_drive_downloader import GoogleDriveDownloader as gdd
+import torch
 
-import requests
-import os
-import streamlit as st
-
-# Define the expected size of the model file (in bytes) after downloading it manually
-EXPECTED_MODEL_SIZE = 180200000  # Replace with the actual model size in bytes
 
 # URL and destination of the model
-MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
-MODEL_PATH = 'fantasy_score_model.pkl'
+#MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
+#MODEL_PATH = 'fantasy_score_model.pkl'
 
-# Function to download the model
-def download_model_from_google_drive(file_id, destination):
-    def get_confirm_token(response):
-        for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
-                return value
-        return None
+@st.cache
+def load_model():
+    model_path = 'D:\\pkl model\fantasy_score_modell.pkl'
+    if not os.path.exists(model_path):
+        gdd.download_file_from_google_drive(file_id='1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N',
+                                            dest_path=model_path,
+                                            unzip=False)
+    model = torch.load(model_path)
+    return model
 
-    def save_response_content(response, destination):
-        CHUNK_SIZE = 32768
-        with open(destination, "wb") as f:
-            for chunk in response.iter_content(CHUNK_SIZE):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
-
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
-
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token(response)
-
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
-    save_response_content(response, destination)
-
-# Download the model
-def download_model():
-    if not os.path.exists(MODEL_PATH):
-        st.write("Downloading model from Google Drive...")
-        download_model_from_google_drive('1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N', MODEL_PATH)
+model = load_model()
     
-    # Verify the model file size
-    model_size = os.path.getsize(MODEL_PATH)
-    if model_size != EXPECTED_MODEL_SIZE:
-        st.error(f"Downloaded model size does not match the expected size ({EXPECTED_MODEL_SIZE} bytes). File may be corrupted.")
-        os.remove(MODEL_PATH)  # Delete the corrupted file to avoid further issues
-        raise FileNotFoundError("Model file download failed or is incomplete.")
-    else:
-        st.write("Model downloaded successfully.")
 
-# Ensure the model is downloaded
-download_model()
+
+
 
 df = pd.read_csv('fantasy_scores.csv')
 
 # Load the model
-try:
-    with open(MODEL_PATH, 'rb') as f:
-       k = joblib.dump(model, f) 
-       model = joblib.load(k) #model = pickle.load(f)    
-except Exception as e:
-    st.error(f"Error loading model: {e}")
+#try:
+    #with open(MODEL_PATH, 'rb') as f:
+       #k = joblib.dump(model, f) 
+       #model = joblib.load(k) #model = pickle.load(f)    
+#except Exception as e:
+    #st.error(f"Error loading model: {e}")
 
     
 # Streamlit UI components
