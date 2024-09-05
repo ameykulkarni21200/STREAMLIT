@@ -20,6 +20,7 @@ Flask==3.0.3
 Flask-Cors==4.0.1
 fonttools==4.53.1
 fqdn==1.5.1
+gunicorn
 idna==3.7
 isoduration==20.11.0
 itsdangerous==2.2.0
@@ -57,8 +58,6 @@ pyparsing==3.1.2
 python-dateutil==2.9.0.post0
 python-json-logger==2.0.7
 pytz==2024.1
-pywin32==306
-pywinpty==2.0.13
 PyYAML==6.0.2
 pyzmq==26.1.1
 referencing==0.35.1
