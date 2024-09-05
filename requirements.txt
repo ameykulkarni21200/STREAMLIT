@@ -87,3 +87,5 @@ websocket-client==1.8.0
 websockets==13.0
 Werkzeug==3.0.3
 streamlit
+torch
+google_drive_downloader
