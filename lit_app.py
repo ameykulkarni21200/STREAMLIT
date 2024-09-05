@@ -8,25 +8,28 @@ import requests
 MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
 MODEL_PATH = 'fantasy_score_model.pkl'
 
+EXPECTED_MODEL_SIZE = 188946758  # Replace with the actual model size in bytes
+
 def download_model():
     if not os.path.exists(MODEL_PATH):
         st.write("Downloading model from Google Drive...")
         with requests.Session() as session:
             response = session.get(MODEL_URL, stream=True)
-            # Check if Google Drive sends a 'confirm' link for large files
-            if "text/html" in response.headers.get("content-type", ""):
-                # Parse the confirmation page and extract the download link
-                for key, value in response.cookies.items():
-                    if key.startswith('download_warning'):
-                        MODEL_URL_confirm = MODEL_URL + "&confirm=" + value
-                        response = session.get(MODEL_URL_confirm, stream=True)
-                        break
-            # Write the model file locally
-            with open(MODEL_PATH, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:  # Filter out keep-alive new chunks
-                        f.write(chunk)
-            st.write("Model downloaded successfully.")
+            if response.status_code == 200:
+                with open(MODEL_PATH, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                st.write("Model downloaded successfully.")
+            else:
+                st.error("Failed to download the model.")
+
+        # Verify the model file size
+        model_size = os.path.getsize(MODEL_PATH)
+        if model_size != EXPECTED_MODEL_SIZE:
+            st.error("Downloaded model size does not match the expected size. The file might be corrupted.")
+            os.remove(MODEL_PATH)  # Delete the corrupted file
+
 
 # Ensure the model is downloaded
 download_model()
