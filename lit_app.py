@@ -5,7 +5,6 @@ import joblib
 import os
 import requests
 from google_drive_downloader import GoogleDriveDownloader as gdd
-import torch
 
 
 # URL and destination of the model
@@ -19,7 +18,7 @@ def load_model():
         gdd.download_file_from_google_drive(file_id='1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N',
                                             dest_path=model_path,
                                             unzip=False)
-    model = torch.load(model_path)
+    model = joblib.load(model_path)
     return model
 
 model = load_model()
