@@ -5,43 +5,73 @@ import joblib
 import os
 import requests
 
+import requests
+import os
+import streamlit as st
 
-# URL of your model stored on Google Drive
+# Define the expected size of the model file (in bytes) after downloading it manually
+EXPECTED_MODEL_SIZE = 180200000  # Replace with the actual model size in bytes
+
+# URL and destination of the model
 MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
 MODEL_PATH = 'fantasy_score_model.pkl'
 
-EXPECTED_MODEL_SIZE = 180200000  # Replace with the actual model size in bytes
+# Function to download the model
+def download_model_from_google_drive(file_id, destination):
+    def get_confirm_token(response):
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                return value
+        return None
 
+    def save_response_content(response, destination):
+        CHUNK_SIZE = 32768
+        with open(destination, "wb") as f:
+            for chunk in response.iter_content(CHUNK_SIZE):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
+
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+# Download the model
 def download_model():
     if not os.path.exists(MODEL_PATH):
         st.write("Downloading model from Google Drive...")
-        with requests.Session() as session:
-            response = session.get(MODEL_URL, stream=True)
-            if response.status_code == 200:
-                with open(MODEL_PATH, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-                st.write("Model downloaded successfully.")
-            else:
-                st.error("Failed to download the model.")
-
-        # Verify the model file size
-        model_size = os.path.getsize(MODEL_PATH)
-        if model_size != EXPECTED_MODEL_SIZE:
-            st.error("Downloaded model size does not match the expected size. The file might be corrupted.")
-            os.remove(MODEL_PATH)  # Delete the corrupted file
-
+        download_model_from_google_drive('1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N', MODEL_PATH)
+    
+    # Verify the model file size
+    model_size = os.path.getsize(MODEL_PATH)
+    if model_size != EXPECTED_MODEL_SIZE:
+        st.error(f"Downloaded model size does not match the expected size ({EXPECTED_MODEL_SIZE} bytes). File may be corrupted.")
+        os.remove(MODEL_PATH)  # Delete the corrupted file to avoid further issues
+        raise FileNotFoundError("Model file download failed or is incomplete.")
+    else:
+        st.write("Model downloaded successfully.")
 
 # Ensure the model is downloaded
 download_model()
 
-# Load your data and model
 df = pd.read_csv('fantasy_scores.csv')
-with open(MODEL_PATH, 'rb') as f:
-    k = joblib.dump(model, f) 
-    model = joblib.load(k) #model = pickle.load(f)
 
+# Load the model
+try:
+    with open(MODEL_PATH, 'rb') as f:
+       k = joblib.dump(model, f) 
+       model = joblib.load(k) #model = pickle.load(f)    
+except Exception as e:
+    st.error(f"Error loading model: {e}")
+
+    
 # Streamlit UI components
 st.title("Fantasy Score Predictor")
 
