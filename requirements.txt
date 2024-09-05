@@ -86,5 +86,4 @@ webencodings==0.5.1
 websocket-client==1.8.0
 websockets==13.0
 Werkzeug==3.0.3
-streamlit
 google-drive-downloader
