@@ -10,7 +10,7 @@ import requests
 MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
 MODEL_PATH = 'fantasy_score_model.pkl'
 
-EXPECTED_MODEL_SIZE = 188946758  # Replace with the actual model size in bytes
+EXPECTED_MODEL_SIZE = 180200000  # Replace with the actual model size in bytes
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
