@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
-import pickle
+#import pickle
+import joblib
 import os
 import requests
+
 
 # URL of your model stored on Google Drive
 MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
@@ -37,7 +39,8 @@ download_model()
 # Load your data and model
 df = pd.read_csv('fantasy_scores.csv')
 with open(MODEL_PATH, 'rb') as f:
-    model = pickle.load(f)
+    k = joblib.dump(model, f) 
+    model = joblib.load(k) #model = pickle.load(f)
 
 # Streamlit UI components
 st.title("Fantasy Score Predictor")
