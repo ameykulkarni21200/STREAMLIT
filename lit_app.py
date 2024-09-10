@@ -11,23 +11,66 @@ from google_drive_downloader import GoogleDriveDownloader as gdd
 #MODEL_URL = 'https://drive.google.com/uc?export=download&id=1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
 #MODEL_PATH = 'fantasy_score_model.pkl'
 
-@st.cache
-def load_model():
-    model_path = 'D:\\pkl model\fantasy_score_modell.pkl'
-    if not os.path.exists(model_path):
-        gdd.download_file_from_google_drive(file_id='1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N',
+##@st.cache
+##def load_model():
+    ##model_path = 'D:\\pkl model\fantasy_score_modell.pkl'
+    ##if not os.path.exists(model_path):
+        ##gdd.download_file_from_google_drive(file_id='1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N',
                                             dest_path=model_path,
                                             unzip=False)
-    model = joblib.load(model_path)
-    return model
+    ##model = joblib.load(model_path)
+    ##return model
 
-model = load_model()
+##model = load_model()
     
 
 
 
 
 df = pd.read_csv('fantasy_scores.csv')
+
+
+import streamlit as st
+import joblib
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+import io
+
+# Path to your service account key file
+SERVICE_ACCOUNT_FILE = 'client_secret_297131267424-eeir38415dq5p16h7hl8h1f1ql6fgbun.apps.googleusercontent.com.json'
+
+# Authenticate and create the service
+credentials = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE,
+    scopes=['https://www.googleapis.com/auth/drive']
+)
+service = build('drive', 'v3', credentials=credentials)
+
+# Function to download a file from Google Drive
+def download_file(file_id):
+    request = service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        print(f"Download {int(status.progress() * 100)}%.")
+    fh.seek(0)
+    return fh
+
+# Example usage
+file_id = '1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N'
+file_content = download_file(file_id)
+
+# Load the .pkl file using joblib
+model = joblib.load(file_content)
+st.write("Model loaded successfully.")
+
+
+
+
+
 
 # Load the model
 #try:
