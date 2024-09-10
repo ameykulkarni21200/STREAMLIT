@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 import os
 import requests
-from google_drive_downloader import GoogleDriveDownloader as gdd
+#from google_drive_downloader import GoogleDriveDownloader as gdd
 
 
 # URL and destination of the model
