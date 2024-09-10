@@ -16,8 +16,8 @@ import requests
     ##model_path = 'D:\\pkl model\fantasy_score_modell.pkl'
     ##if not os.path.exists(model_path):
         ##gdd.download_file_from_google_drive(file_id='1D1kPHNLC1MpVirOp-jhU3ViXkDJVUS_N',
-                                            dest_path=model_path,
-                                            unzip=False)
+                                            ##dest_path=model_path,
+                                            ##unzip=False)
     ##model = joblib.load(model_path)
     ##return model
 
